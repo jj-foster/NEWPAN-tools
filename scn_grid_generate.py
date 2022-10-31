@@ -44,5 +44,4 @@ for i in xs:
             lines.append(f"{i} {j} {k}\n")
 
 with open(f"{directory}{proj_name}.scn",'w') as f:
-#with open('a.txt','w') as f:
     f.writelines(lines)
