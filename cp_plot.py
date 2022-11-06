@@ -5,46 +5,54 @@ Use for only one geometry. Multiple wakes are accepted but labels must be input 
 import pandas as pd
 import matplotlib.pyplot as plt
 
-data_file="data/nacelle_cp.exp2d"
+data_files=[
+    "data/nacelle_cp.exp2d",
+    "data/nacelle_wake_cp.exp2d"
+]
 variable='Cp'
 units='m'
 
 #############   read data   #############
 
-with open(data_file,'r') as f:
-    lines=f.readlines()
-
-i=0
 curve_data=[]
-point_data=[]
-while i<len(lines):
+curve_columns=[]
+for file in data_files:
 
-    if lines[i][0]=="#":
-        points=int(lines[i+1])
-        i+=3
+    with open(file,'r') as f:
+        lines=f.readlines()
 
-        continue
-    
-    j=0
+    i=0
     point_data=[]
-    while j<points:
-        line=lines[i+j].strip().split()
-        line=list(map(float,line))
+    while i<len(lines):
 
-        point_data.append(line)
+        if lines[i][0]=="#":
+            points=int(lines[i+1])
 
-        j+=1
+            columns=lines[i+2].strip().split()[1:]
+            curve_columns.append(columns)
+
+            i+=3
+
+            continue
         
-    curve_data.append(point_data)
-    i+=points
+        j=0
+        point_data=[]
+        while j<points:
+            line=lines[i+j].strip().split()
+            line=list(map(float,line))
+
+            point_data.append(line)
+
+            j+=1
+            
+        curve_data.append(point_data)
+        i+=points
 
 data=[]
-for curve in curve_data:
+for i,curve in enumerate(curve_data):
     data.append(pd.DataFrame(
         curve,
-        columns=[
-            'x','y','Cp','dCp','Q','phi','u','v','w','Theta','H','Cf','DStar','critk1','critk2','ibl'
-        ]
+        columns=curve_columns[i]
     ))
 
 #############   plot   #############
@@ -53,12 +61,12 @@ fig,ax1=plt.subplots()
 ax2=ax1.twinx()
 
 for curve in data:
-    xs=curve['x'].tolist()
+    xs=curve['X'].tolist()
     y1s=curve[variable].tolist()
 
-    ax1.scatter(xs,y1s,marker='o',label=variable)
+    ax1.plot(xs,y1s,marker='.',label=variable)
 
-y2s=curve['y'].tolist()
+y2s=curve['Y'].tolist()
 ax2.plot(xs,y2s,color='k',label='Geometry')
 
 
@@ -67,7 +75,9 @@ ax2.set_ylabel(f"y ({units})")
 ax1.set_ylabel(variable)
 
 ax2.set_aspect('equal')
+ax1.legend(["no wake","wake relaxation 1"])
 
 if variable=="Cp":
     ax1.invert_yaxis()
+
 plt.show()
