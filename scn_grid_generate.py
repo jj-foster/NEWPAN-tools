@@ -1,19 +1,21 @@
 import numpy as np
+import json
 
 proj_name="EDF"
 directory="D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/3_EDF/1_EDFActuatorDisk/"
+grid_def="grids/EDF_xz.json"
 
 run=1
 wake=1
 
-corner=np.array([-0.1,0,-0.1])
-delta=np.array([0.6,0,0.2])
-
-x_count=300
-y_count=0
-z_count=300
-
 ####################################################################################
+
+with open(grid_def,'r') as f:
+    data=json.load(f)
+
+corner = np.array(data["corner"])
+delta = np.array(data["delta"])
+x_count,y_count,z_count = data["count"]
 
 x0,y0,z0=corner
 x1,y1,z1=corner+delta
