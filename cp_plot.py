@@ -1,8 +1,13 @@
+"""
+Use for only one geometry. Multiple wakes are accepted but labels must be input manually.
+"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
-data_file="nacelle_cp2.exp2d"
-axes=['x','Cp']
+data_file="data/nacelle_cp.exp2d"
+variable='Cp'
+units='m'
 
 #############   read data   #############
 
@@ -44,16 +49,25 @@ for curve in curve_data:
 
 #############   plot   #############
 
-fig,ax=plt.subplots()
+fig,ax1=plt.subplots()
+ax2=ax1.twinx()
 
 for curve in data:
-    xs=curve[axes[0]].tolist()
-    ys=curve[axes[1]].tolist()
+    xs=curve['x'].tolist()
+    y1s=curve[variable].tolist()
 
-    ax.plot(xs,ys)
+    ax1.scatter(xs,y1s,marker='o',label=variable)
 
-ax.set_xlabel(axes[0])
-ax.set_ylabel(axes[1])
+y2s=curve['y'].tolist()
+ax2.plot(xs,y2s,color='k',label='Geometry')
 
-plt.gca().invert_yaxis()
+
+ax1.set_xlabel(f"x ({units})")
+ax2.set_ylabel(f"y ({units})")
+ax1.set_ylabel(variable)
+
+ax2.set_aspect('equal')
+
+if variable=="Cp":
+    ax1.invert_yaxis()
 plt.show()
