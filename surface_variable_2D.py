@@ -4,10 +4,14 @@ Use for only one geometry. Multiple wakes are accepted but labels must be input 
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 data_files=[
-    "data/nacelle_cp.exp2d",
-    "data/nacelle_wake_cp.exp2d"
+    "data/EDF_wing/CT0.0_CQ0.0_w1.exp2d",
+    "data/EDF_wing/CT0.1_CQ0.0_w1.exp2d",
+    "data/EDF_wing/CT0.2_CQ0.0_w1.exp2d",
+    "data/EDF_wing/CT0.5_CQ0.0_w1.exp2d",
+    "data/EDF_wing/CT3.0_CQ0.0_w1.exp2d",
 ]
 variable='Cp'
 units='m'
@@ -16,20 +20,26 @@ units='m'
 
 curve_data=[]
 curve_columns=[]
+curve_names=[]
 for file in data_files:
+    file_name=os.path.splitext(file)[0].split("/")[-1]
 
     with open(file,'r') as f:
         lines=f.readlines()
 
     i=0
     point_data=[]
+    curve_count=0
     while i<len(lines):
 
         if lines[i][0]=="#":
             points=int(lines[i+1])
-
+            
             columns=lines[i+2].strip().split()[1:]
             curve_columns.append(columns)
+
+            curve_names.append(f"{file_name}_{curve_count}")
+            curve_count+=1
 
             i+=3
 
@@ -60,11 +70,11 @@ for i,curve in enumerate(curve_data):
 fig,ax1=plt.subplots()
 ax2=ax1.twinx()
 
-for curve in data:
+for i,curve in enumerate(data):
     xs=curve['X'].tolist()
     y1s=curve[variable].tolist()
 
-    ax1.plot(xs,y1s,marker='.',label=variable)
+    ax1.plot(xs,y1s,marker='.',label=curve_names[i])
 
 y2s=curve['Y'].tolist()
 ax2.plot(xs,y2s,color='k',label='Geometry')
@@ -75,7 +85,7 @@ ax2.set_ylabel(f"y ({units})")
 ax1.set_ylabel(variable)
 
 ax2.set_aspect('equal')
-ax1.legend(["no wake","wake relaxation 1"])
+ax1.legend()
 
 if variable=="Cp":
     ax1.invert_yaxis()

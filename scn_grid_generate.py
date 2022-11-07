@@ -1,9 +1,9 @@
 import numpy as np
 import json
 
-proj_name="EDF"
-directory="D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/3_EDF/1_EDFActuatorDisk/"
-grid_def="grids/EDF_xz.json"
+proj_name="EDF_wing"
+directory="D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/5_EDF_wing/"
+grid_def="grids/EDF_wing_xz.json"
 
 run=1
 wake=1

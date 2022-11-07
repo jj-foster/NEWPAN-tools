@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-data="data/EDF_blo.vel1"
+data="data/EDF_wing/CT3.0_CQ0.0_w1.vel1"
 plane="xz"
 
 with open(data,'r') as f:
@@ -65,6 +65,6 @@ def plot(xs,ys,z,title,contours,vmin=None,vmax=None):
 fig1=plot(xs,ys,u,"u",50,vmin=-2,vmax=2)
 # fig2=plot(xs,ys,v,"v",50,vmin=-5,vmax=5)
 # fig3=plot(xs,ys,w,"w",50,vmin=-5,vmax=5)
-fig4=plot(xs,ys,Cp,"Cp",50,vmin=-5,vmax=5)
+fig4=plot(xs,ys,Cp,"Cp",50,vmin=-3,vmax=5)
 
 plt.show()
