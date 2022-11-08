@@ -48,7 +48,7 @@ def cylinder(data):
     d_count =   int(data["d_count"])
 
     r_steps=np.linspace(r1,r2,r_count)
-    angle_steps=np.linspace(0,2*np.pi,angle_count+1)[:-1]
+    angle_steps=np.linspace(0,2*np.pi,angle_count+1)
     d_steps=np.linspace(0,depth,d_count)
 
     v1=np.array([0,0,1])   # v1 aligned with z
@@ -65,8 +65,8 @@ def cylinder(data):
         for r in r_steps:
             for a in angle_steps:
                 coord=list(centre+r*(np.cos(a)*v1+np.sin(a)*v2))
-                if coord not in coords:
-                    coords.append(coord)
+                #if coord not in coords:
+                coords.append(coord)
 
     coords=np.array(coords)
     coords=np.around(coords,10)
@@ -86,13 +86,13 @@ def plot_grid(coords):
         coords=np.delete(coords,zero_index,axis=1)
 
         ax=plt.axes()
-        ax.scatter(coords[:,0],coords[:,1])
+        ax.scatter(coords[:,0],coords[:,1],color='k',marker='.')
         ax.set_aspect('equal')
 
     else:
         ax=plt.axes(projection='3d')
 
-        ax.scatter(coords[:,0],coords[:,1],coords[:,2])
+        ax.scatter(coords[:,0],coords[:,1],coords[:,2],color='k',marker='.')
 
         # sets plot aspect ratio
         ax.set_box_aspect((np.ptp(coords[:,0]),np.ptp(coords[:,1]),np.ptp(coords[:,2])))
@@ -118,15 +118,15 @@ def export_grid(run,wake,coords):
 
 if __name__=="__main__":
 
-    proj_name="test"
-    directory=""
-    grid_def="grids/EDF_wing_xz.json"
+    proj_name="EDF"
+    directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\3_EDF\\3_EDFActuatorDisk_wake\\"
+    grid_def="grids/EDF_outlet.json"
 
     run=1
     wake=1
 
-    plot=True
-    export=False
+    plot=False
+    export=True
 
     ####################################################################################
 

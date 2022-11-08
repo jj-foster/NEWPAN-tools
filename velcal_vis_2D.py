@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import shutil
 
 def read_velcal(file):
 
@@ -74,14 +75,22 @@ def contours_2d(data,plane):
     fig1=plot(xs,ys,data["u"],"u",50,vmin=-2,vmax=2)
     # fig2=plot(xs,ys,data["v"],"v",50,vmin=-5,vmax=5)
     # fig3=plot(xs,ys,data["w"],"w",50,vmin=-5,vmax=5)
-    fig4=plot(xs,ys,data["Cp"],"Cp",50,vmin=-3,vmax=5)
+    # fig4=plot(xs,ys,data["Cp"],"Cp",50,vmin=-3,vmax=5)
 
     plt.show()
 
 if __name__=="__main__":   
 
-    data_file="data/EDF_wing/CT0.2_CQ0.0_w1.vel1"
-    plane="xz"
+    # proj_dir="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\3_EDF\\3_EDFActuatorDisk_wake\\"
+    # proj_name="EDF"
+    # vel_file0=proj_dir+proj_name+".vel1"
 
-    data=read_velcal(data_file)
+    # vel_file="data/EDF_actuator/EDF_outlet.vel1"
+    # shutil.copy(vel_file,relocate)
+
+    vel_file="data/EDF_actuator/EDF_inlet.vel1"
+
+    plane="YZ"
+
+    data=read_velcal(vel_file)
     contours_2d(data,plane)
