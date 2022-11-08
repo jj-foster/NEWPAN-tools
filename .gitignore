@@ -1,2 +1,4 @@
 /data
 /grids
+/__pycache__
+/env
