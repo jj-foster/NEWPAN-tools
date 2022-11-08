@@ -74,7 +74,21 @@ for i,curve in enumerate(data):
     xs=curve['X'].tolist()
     y1s=curve[variable].tolist()
 
-    ax1.plot(xs,y1s,marker='.',label=curve_names[i])
+    """
+    if curve_names[i][:2]=="cl":
+        color='r'
+    else:
+        color='b'
+
+    if curve_names[i][-1]=="0":
+        marker='o'
+    else:
+        marker='D'
+
+    ax1.plot(xs,y1s,marker=marker,color=color,label=curve_names[i])
+    """
+
+    ax1.plot(xs,y1s,marker='o',label=curve_names[i])
 
 y2s=curve['Y'].tolist()
 ax2.plot(xs,y2s,color='k',label='Geometry')
