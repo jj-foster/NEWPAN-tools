@@ -85,12 +85,12 @@ if __name__=="__main__":
     # proj_name="EDF"
     # vel_file0=proj_dir+proj_name+".vel1"
 
-    # vel_file="data/EDF_actuator/EDF_outlet.vel1"
-    # shutil.copy(vel_file,relocate)
+    # vel_file="data/EDF_actuator/EDF_actuator_hr.vel1"
+    # shutil.copy(vel_file0,vel_file)
 
-    vel_file="data/EDF_actuator/EDF_inlet.vel1"
+    vel_file="data/EDF_actuator/EDF_actuator_wake1.vel1"
 
-    plane="YZ"
+    plane="XZ"
 
     data=read_velcal(vel_file)
     contours_2d(data,plane)

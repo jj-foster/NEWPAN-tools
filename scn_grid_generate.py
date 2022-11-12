@@ -104,6 +104,7 @@ def plot_grid(coords):
     plt.show()
 
 def export_grid(run,wake,coords):
+    
     lines=[
         f"{run} {wake}\n"
     ]
@@ -120,7 +121,7 @@ if __name__=="__main__":
 
     proj_name="EDF"
     directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\3_EDF\\3_EDFActuatorDisk_wake\\"
-    grid_def="grids/EDF_outlet.json"
+    grid_def="grids/EDF_xz.json"
 
     run=1
     wake=1

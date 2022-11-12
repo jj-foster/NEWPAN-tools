@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-data="data/actuator_line_section.vel1"
+data="data/wing_actuator/actuator_line_section2.vel1"
 
 with open(data,'r') as f:
     lines=f.readlines()
@@ -42,6 +42,8 @@ xs=[]
 for length in lengths:
     xs.append(length/total_len)
 
+xs=y
+
 def plot(xs,ys,series,ax=None,vmin=None,vmax=None):
     # limit
     if vmin==None:
@@ -74,6 +76,6 @@ plot(xs,w,"w",ax=ax)
 plot(xs,Cp,"Cp",ax=ax)#,vmin=-5,vmax=5)
 
 ax.legend()
-ax.set_xlabel("x/X")
+#ax.set_xlabel("x/X")
 
 plt.show()
