@@ -68,9 +68,10 @@ def mass_flow_rate_disk(data_file,grid_def):
             AU=(r_steps[i]**2-r_steps[i-1]**2)*((u[i,j]+u[i,j-1]+u[i-1,j]+u[i-1,j-1])/4)
             mdot+=AU*np.pi*angle_steps[1]/(2*np.pi)
     
-    print(np.mean(u[:,0]))
+    u_avg=round(np.mean(u[:,0]), 4-int(np.floor(np.log10(abs(np.mean(u[:,0])))))-1)
+    mdot=round(mdot, 4-int(np.floor(np.log10(abs(mdot))))-1)
 
-    return round(mdot, 4-int(np.floor(np.log10(abs(mdot))))-1)
+    return mdot,u_avg
     
 if __name__=="__main__":
     
@@ -78,10 +79,11 @@ if __name__=="__main__":
     proj_name="EDF"
     vel_file=proj_dir+proj_name+".vel1"
 
-    relocate="data/EDF_actuator/EDF_outlet.vel1"
+    relocate="data/EDF_actuator/EDF_inlet.vel1"
     shutil.copy(vel_file,relocate)
 
     #vel_file="data/EDF_actuator/EDF_outlet.vel1"
-    grid_def="grids/EDF_outlet.json"
+    grid_def="grids/EDF_inlet.json"
 
-    print(f"mdot: {mass_flow_rate_disk(vel_file,grid_def)}")
+    mdot,u_avg=mass_flow_rate_disk(vel_file,grid_def)
+    print(f"u_avg: {u_avg}\nmdot: {mdot}")
