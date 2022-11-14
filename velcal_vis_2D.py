@@ -1,34 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import shutil
 
 def read_velcal(file):
 
-    with open(file,'r') as f:
-        lines=f.readlines()
+    data=pd.read_csv(file,skiprows=2,skip_blank_lines=True,delim_whitespace=True,header=None)
+    data.columns=["x","y","z","u","v","w","Cp"]
+    data=data.apply(lambda x: pd.to_numeric(x, errors='coerce'))#.dropna()
 
-    lines=lines[2:]
-
-    data={
-        "x":np.zeros((len(lines))),
-        "y":np.zeros((len(lines))),
-        "z":np.zeros((len(lines))),
-        "u":np.zeros((len(lines))),
-        "v":np.zeros((len(lines))),
-        "w":np.zeros((len(lines))),
-        "Cp":np.zeros((len(lines)))
-    }
-
-    for i,line in enumerate(lines):
-        line_=line.strip().split()
-        
-        data["x"][i]=float(line_[0])
-        data["y"][i]=float(line_[1])
-        data["z"][i]=float(line_[2])
-        data["u"][i]=float(line_[3])
-        data["v"][i]=float(line_[4])
-        data["w"][i]=float(line_[5])
-        data["Cp"][i]=float(line_[6])
+    data.fillna(10000,inplace=True)
+    
+    data=data.reset_index()
 
     return data
 
@@ -47,7 +30,7 @@ def plot(xs,ys,z,title,contours,vmin=None,vmax=None):
             z_.append(vmax)
         else:
             z_.append(z[i])
-
+    
     # plot
     fig,ax=plt.subplots()
     
@@ -64,7 +47,7 @@ def plot(xs,ys,z,title,contours,vmin=None,vmax=None):
 def contours_2d(data,plane):
     
     if plane.upper()=="XZ":
-        xs,ys=data["x"],data["z"]
+        xs,ys=data["x"].to_numpy(),data["z"].to_numpy()
     elif plane.upper()=="XY":
         xs,ys=data["x"],data["y"]
     elif plane.upper()=="YZ":
@@ -72,10 +55,10 @@ def contours_2d(data,plane):
     else:
         raise ValueError("Invalid plane.")
 
-    fig1=plot(xs,ys,data["u"],"u",50,vmin=-2,vmax=2)
+    fig1=plot(xs,ys,data["u"],"u",50,vmin=-3,vmax=3)
     # fig2=plot(xs,ys,data["v"],"v",50,vmin=-5,vmax=5)
     # fig3=plot(xs,ys,data["w"],"w",50,vmin=-5,vmax=5)
-    # fig4=plot(xs,ys,data["Cp"],"Cp",50,vmin=-3,vmax=5)
+    fig4=plot(xs,ys,data["Cp"],"Cp",50,vmin=-2,vmax=5)
 
     plt.show()
 
@@ -85,12 +68,12 @@ if __name__=="__main__":
     # proj_name="EDF"
     # vel_file0=proj_dir+proj_name+".vel1"
 
-    # vel_file="data/EDF_actuator/EDF_actuator_hr.vel1"
+    # vel_file="data/EDF_actuator/EDF_CT1.vel1"
     # shutil.copy(vel_file0,vel_file)
 
-    vel_file="data/EDF_actuator/EDF_actuator_wake1.vel1"
+    vel_file="data/EDF_actuator/EDF_CT1.vel1"
 
-    plane="XZ"
+    plane="xz"
 
     data=read_velcal(vel_file)
     contours_2d(data,plane)
