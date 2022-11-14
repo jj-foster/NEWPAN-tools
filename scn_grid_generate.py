@@ -124,7 +124,7 @@ if __name__=="__main__":
     grid_def="grids/EDF_xz.json"
 
     run=1
-    wake=1
+    wake=2
 
     plot=False
     export=True
