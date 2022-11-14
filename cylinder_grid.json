@@ -1,0 +1,11 @@
+{
+    "type":"cylinder",
+    "origin":[0.008,0,0],
+    "axis":[1,0,0],
+    "r1":1,
+    "r2":2,
+    "depth":0,
+    "r_count":8,
+    "angle_count":60,
+    "d_count":1
+}
