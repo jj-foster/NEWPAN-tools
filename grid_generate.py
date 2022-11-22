@@ -38,16 +38,17 @@ def cuboid(data):
 
 def cylinder(data):
 
-    origin  =   np.array(data["origin"])
-    axis    =   np.array(data["axis"])
-    r1      =   float(data["r1"])
-    r2      =   float(data["r2"])
-    depth   =   float(data["depth"])
-    r_count =   int(data["r_count"])
+    origin      =   np.array(data["origin"])
+    axis        =   np.array(data["axis"])
+    r1          =   float(data["r1"])
+    r2          =   float(data["r2"])
+    depth       =   float(data["depth"])
+    r_count     =   int(data["r_count"])
     angle_count =   int(data["angle_count"])
-    d_count =   int(data["d_count"])
+    d_count     =   int(data["d_count"])
+    r1_taper_angle = float(data["r1_taper_angle"])
+    r2_taper_angle = float(data["r2_taper_angle"])
 
-    r_steps=np.linspace(r1,r2,r_count)
     angle_steps=np.linspace(0,2*np.pi,angle_count+1)
     d_steps=np.linspace(0,depth,d_count)
 
@@ -62,6 +63,10 @@ def cylinder(data):
         else:
             centre=origin
         
+        r1_=r1+d*np.sin(np.deg2rad(r1_taper_angle))
+        r2_=r2+d*np.sin(np.deg2rad(r2_taper_angle))
+        r_steps=np.linspace(r1_,r2_,r_count)
+
         for r in r_steps:
             for a in angle_steps:
                 coord=list(centre+r*(np.cos(a)*v1+np.sin(a)*v2))
@@ -103,31 +108,60 @@ def plot_grid(coords):
 
     plt.show()
 
-def export_grid(run,wake,coords):
+def export_grid(run,wake,coords,file_type):
     
-    lines=[
-        f"{run} {wake}\n"
-    ]
+    if file_type==".scn":
+        lines=[f"{run} {wake}\n"]
+    elif file_type==".qo" or file_type==".qom" or file_type==".qpt":
+        lines=[f"{int(len(coords))}\n"]
+    else:
+        raise Exception(f"{file_type} is not a valid file type.")
 
     for coord in coords:
-        lines.append(f"{coord[0]} {coord[1]} {coord[2]}\n")
+        lines.append(f"{' '.join([str(x) for x in coord.tolist()])}\n")
     
-    with open(f"{directory}{proj_name}.scn",'w') as f:
+    with open(f"{directory}{proj_name}{file_type}",'w') as f:
         f.writelines(lines)
 
     return None
 
+def const_qo(coords):
+
+    du  = np.full(len(coords),0)
+    dv  = np.full(len(coords),0)
+    dw  = np.full(len(coords),0)
+    dcp = np.full(len(coords),-10)
+    
+    coords=coords.T
+
+    # coords = np.append(coords,du,axis=0)
+    # coords = np.append(coords,dv,axis=0)
+    # coords = np.append(coords,dw,axis=0)
+    # coords = np.append(coords,dcp,axis=0)
+    
+    coords=coords.tolist()
+    coords.append(du)
+    coords.append(dv)
+    coords.append(dw)
+    coords.append(dcp)
+    
+    coords=np.array(coords).T
+
+    return coords
+
 if __name__=="__main__":
 
-    proj_name="EDF"
-    directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\3_EDF\\3_EDFActuatorDisk_wake\\"
-    grid_def="grids/EDF_xz.json"
+    proj_name="wing"
+    directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\6_qo\\1_qo\\"
+    grid_def="grids/wing_qo_xz.json"
 
     run=1
-    wake=2
+    wake=0
 
-    plot=False
+    plot=True
     export=True
+
+    file_type=".qpt"
 
     ####################################################################################
 
@@ -136,15 +170,18 @@ if __name__=="__main__":
 
     if data["type"]=="cylinder":
         coords=cylinder(data)
-
     elif data["type"]=="cuboid":
         coords=cuboid(data)
-
     else:
         raise ValueError("Invalid grid type.")
 
+
     if export==True:
-        export_grid(run,wake,coords)
+        if file_type==".qo" or file_type==".qom":
+            coords=const_qo(coords)
+            
+        export_grid(run,wake,coords,file_type)
+
     if plot==True:
         plot_grid(coords)
     
