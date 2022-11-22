@@ -5,9 +5,8 @@ Use for only one geometry. Multiple wakes are accepted but labels must be input 
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
-from scipy.integrate import simpson
 import numpy as np
-from shapely import geometry, ops
+from shapely import ops
 
 def read(data_files:list):
 
@@ -88,7 +87,6 @@ def plot(data:list,curve_names:list,variable:str,units:str):
     y2s=curve['Y'].tolist()
     ax2.plot(xs,y2s,color='k',label='Geometry')
 
-
     ax1.set_xlabel(f"x ({units})")
     ax2.set_ylabel(f"y ({units})")
     ax1.set_ylabel(variable)
@@ -101,7 +99,7 @@ def plot(data:list,curve_names:list,variable:str,units:str):
 
     return plt
 
-def intersecting_area(xs,ys):
+def intersecting_area(xs:list,ys:list,plot=False):
 
     # snip ends of curves to match in x
     if xs[0]!=xs[-1]:
@@ -136,8 +134,18 @@ def intersecting_area(xs,ys):
     areas=[]
     for polygon in ops.polygonize(mls):
         areas.append(polygon.area)
-
+        
     area_sum=areas[0]-areas[1]
+
+    if plot==True:
+        fig,ax=plt.subplots()
+        ax.invert_yaxis()
+
+        for polygon in ops.polygonize(mls):
+            ax.plot(*polygon.exterior.xy)
+            centroid=polygon.centroid.xy
+            ax.text(centroid[0][0],centroid[1][0],f"{round(polygon.area,4)}")
+
 
     return area_sum
 
@@ -152,13 +160,13 @@ if __name__=="__main__":
     # ]
     data_files=["data/nacelle_cp.exp2d"]
 
-    variable='u'
+    variable='Cp'
     units='m'
     
     data,curve_names=read(data_files)
 
-    area=intersecting_area(data[0]['X'].to_list(),data[0]['u'].to_list())
-    print(area)
+    area=intersecting_area(data[0]['X'].to_list(),data[0]['Cp'].to_list(),plot=True)
+    print(f"Area: {area}")
 
     fig=plot(data,curve_names,variable,units)
-    #plt.show()
+    plt.show()
