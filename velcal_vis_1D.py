@@ -1,9 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import shutil
 
-data="data/wing_actuator/actuator_line_section2.vel1"
+proj_dir="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\6_qo\\2_qo\\"
+proj_name="wing"
+vel_file0=proj_dir+proj_name+".vel1"
 
-with open(data,'r') as f:
+vel_file="results/wing_qo/line_4_0.5du.vel1"
+shutil.copy(vel_file0,vel_file)
+
+# vel_file="results/wing_qo/line_5_1du.vel1"
+
+with open(vel_file,'r') as f:
     lines=f.readlines()
 
 lines=lines[2:]
@@ -42,7 +50,8 @@ xs=[]
 for length in lengths:
     xs.append(length/total_len)
 
-xs=y
+#xs=y
+xs=x
 
 def plot(xs,ys,series,ax=None,vmin=None,vmax=None):
     # limit
@@ -72,10 +81,16 @@ fig,ax=plt.subplots()
 
 plot(xs,u,"u",ax=ax)#,vmin=-0.5,vmax=2)
 plot(xs,v,"v",ax=ax)
-plot(xs,w,"w",ax=ax)
-plot(xs,Cp,"Cp",ax=ax)#,vmin=-5,vmax=5)
+plot(xs,w,"w",ax=ax,vmin=-5,vmax=5)
+#plot(xs,Cp,"Cp",ax=ax)#,vmin=-5,vmax=5)
 
-ax.legend()
+ax.scatter([-5,-2.5,0,2.5],[1,0,0.5,0],color='k')
+
+ax.set_yticks(np.arange(-5, 5+1, 1.0))
+ax.set_xlabel("x (m)")
+ax.set_ylabel("V (m/s)")
+ax.set_box_aspect(1)
 #ax.set_xlabel("x/X")
 
+ax.legend()
 plt.show()
