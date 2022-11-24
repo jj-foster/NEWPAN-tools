@@ -1,5 +1,5 @@
 from velcal_vis_2D import read_velcal
-from scn_grid_generate import cylinder, cuboid
+from grid_generate import cylinder, cuboid
 
 import numpy as np
 import json
@@ -46,6 +46,7 @@ def mass_flow_rate_disk(data_file,grid_def):
     u=np.zeros((r_count,angle_count))
     v=np.zeros((r_count,angle_count))
     w=np.zeros((r_count,angle_count))
+    V=np.zeros((r_count,angle_count))
     Cp=np.zeros((r_count,angle_count))
 
     mdot=0
@@ -57,6 +58,7 @@ def mass_flow_rate_disk(data_file,grid_def):
             v[i,j]=vel_data["v"][line_count]
             w[i,j]=vel_data["w"][line_count]
             Cp[i,j]=vel_data["Cp"][line_count]
+            V[i,j]=np.sqrt(u[i,j]**2+v[i,j]**2+w[i,j]**2)
 
             line_count+=1
 
@@ -65,24 +67,24 @@ def mass_flow_rate_disk(data_file,grid_def):
             
             # mdot calculation - assumes constant density
 
-            AU=(r_steps[i]**2-r_steps[i-1]**2)*((u[i,j]+u[i,j-1]+u[i-1,j]+u[i-1,j-1])/4)
+            AU=(r_steps[i]**2-r_steps[i-1]**2)*((V[i,j]+V[i,j-1]+V[i-1,j]+V[i-1,j-1])/4)
             mdot+=AU*np.pi*angle_steps[1]/(2*np.pi)
     
-    u_avg=round(np.mean(u[:,0]), 4-int(np.floor(np.log10(abs(np.mean(u[:,0])))))-1)
+    u_avg=round(np.mean(V[:,0]), 4-int(np.floor(np.log10(abs(np.mean(V[:,0])))))-1)
     mdot=round(mdot, 4-int(np.floor(np.log10(abs(mdot))))-1)
 
     return mdot,u_avg
     
 if __name__=="__main__":
     
-    proj_dir="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\3_EDF\\3_EDFActuatorDisk_wake\\"
-    proj_name="EDF"
-    vel_file=proj_dir+proj_name+".vel1"
+    # proj_dir="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\3_EDF\\3_EDFActuatorDisk_wake\\"
+    # proj_name="EDF"
+    # vel_file=proj_dir+proj_name+".vel1"
 
-    relocate="data/EDF_actuator/EDF_inlet.vel1"
-    shutil.copy(vel_file,relocate)
+    # relocate="results/EDF_actuator/EDF_inlet.vel1"
+    # shutil.copy(vel_file,relocate)
 
-    #vel_file="data/EDF_actuator/EDF_outlet.vel1"
+    vel_file="results/EDF_actuator/EDF_inlet.vel1"
     grid_def="grids/EDF_inlet.json"
 
     mdot,u_avg=mass_flow_rate_disk(vel_file,grid_def)
