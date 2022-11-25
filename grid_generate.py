@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import matplotlib.pyplot as plt
+from matplotlib import cm, colors
 
 def cuboid_filled(data:dict)->np.ndarray:
     corner = np.array(data["corner"])
@@ -167,12 +168,21 @@ def cylinder(data:dict)->np.ndarray:
 
     return coords
 
-def plot_grid(coords):
+def plot_grid(coords,dV=None):
+    if dV!=None:
+        cmap=cm.jet
+        minV=coords[:,3+dV].min()
+        maxV=coords[:,3+dV].max()
+        norm=colors.BoundaryNorm(
+            np.linspace(minV,maxV,np.unique(coords[:,3+dV]).shape[0]+1),
+            cmap.N,
+            extend='neither'
+        )
 
     fig=plt.figure()
 
     # check if x,y, or z are const
-    const_check=np.all(coords==coords[0,:],axis=0)
+    const_check=np.all(coords==coords[0,:],axis=0)[:3]
 
     if True in const_check:
         # plots in 2d, excluding first column that is const.
@@ -180,13 +190,22 @@ def plot_grid(coords):
         coords=np.delete(coords,zero_index,axis=1)
 
         ax=plt.axes()
-        ax.scatter(coords[:,0],coords[:,1],color='k',marker='.')
+        if dV!=None:
+            for coord in coords:
+                ax.scatter(coord[0],coord[1],color=cmap(norm(coords[3+dV])),marker='.')
+        else:
+            ax.scatter(coords[:,0],coords[:,1],color='k',marker='.')
         ax.set_aspect('equal')
 
     else:
         ax=plt.axes(projection='3d')
 
-        ax.scatter(coords[:,0],coords[:,1],coords[:,2],color='k',marker='.')
+        if dV!=None:
+            for coord in coords:
+                a=cmap(norm(coord[3+dV]))
+                ax.scatter(coord[0],coord[1],coord[2],color=a,marker='.')
+        else:
+            ax.scatter(coords[:,0],coords[:,1],coords[:,2],color='k',marker='.')
 
         # sets plot aspect ratio
         ax.set_box_aspect((np.ptp(coords[:,0]),np.ptp(coords[:,1]),np.ptp(coords[:,2])))
@@ -195,6 +214,10 @@ def plot_grid(coords):
         ax.set_ylabel("y")
         ax.set_zlabel("z")
         plt.tight_layout()
+
+    if dV!=None:
+        sm=plt.cm.ScalarMappable(cmap=cmap,norm=norm)
+        plt.colorbar(sm,ax=ax,label="dV",pad=0.10)
 
     plt.show()
 
@@ -240,21 +263,18 @@ def const_qo(coords,dV):
 
     return coords
 
-def del_NEWPAN_runs(directory:str):
-    pass
-
 if __name__=="__main__":
 
     proj_name="EDF"
     directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\3_EDF\\4_EDF_qo\\"
 
-    grid_def=["grids/EDF_bb.json"]
+    grid_def=["grids/EDF_bb.json","grids/EDF_efflux_sleeve.json","grids/EDF_qo.json"]
 
     run=1
     wake=1
 
     plot=True
-    export=False
+    export=True
 
     file_type=".qo"
 
@@ -267,22 +287,27 @@ if __name__=="__main__":
             data=json.load(f)
 
         if data["type"]=="cylinder":
-            coords.append(cylinder(data))
+            coords_=cylinder(data)
         elif data["type"]=="cuboid":
             if data["filled"]==True:
-                coords.append(cuboid_filled(data))
+                coords_=cuboid_filled(data)
             else:
-                coords.append(cuboid_empty(data))
+                coords_=cuboid_empty(data)
         else:
             raise ValueError("Invalid grid type.")
 
-    coords=np.concatenate([coords[i] for i in range(len(coords))])
+        if file_type==".qo" or file_type==".qom":
+            coords_=const_qo(coords_,data["qo"])
+        
+        coords.append(coords_)
 
+    coords=np.concatenate([coords[i] for i in range(len(coords))])
+        
     if plot==True:
-        plot_grid(coords)
+        if file_type==".qo" or file_type==".qom":
+            plot_grid(coords,dV=0)
+        else:
+            plot_grid(coords)
     
     if export==True:
-        if file_type==".qo" or file_type==".qom":
-            coords=const_qo(coords,data["qo"])
-            
         export_grid(run,wake,coords,file_type)
