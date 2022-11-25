@@ -5,6 +5,8 @@ import pandas as pd
 import shutil
 import json
 
+from qo_vis import qo
+
 def read_velcal(file):
 
     data=pd.read_csv(file,skiprows=2,skip_blank_lines=True,delim_whitespace=True,header=None)
@@ -58,9 +60,9 @@ def contours_2d(data,plane):
         raise ValueError("Invalid plane.")
 
     axes=[]
-    axes.append(plot(xs,ys,data["u"],"u",50,plane,vmin=-2,vmax=2))
+    # axes.append(plot(xs,ys,data["u"],"u",50,plane,vmin=-2,vmax=2))
     # axes.append(plot(xs,ys,data["v"],"v",50,plane,vmin=-5,vmax=5))
-    # axes.append(plot(xs,ys,data["w"],"w",50,plane,vmin=-5,vmax=5))
+    axes.append(plot(xs,ys,data["w"],"w",50,plane,vmin=-2,vmax=2))
     # axes.append(plot(xs,ys,data["Cp"],"Cp",50,plane)#,vmin=-10,vmax=1))
 
     return axes
@@ -96,20 +98,22 @@ def plot_geom(axes:list[plt.axes], geom_files:list):
 
 if __name__=="__main__":  
 
-    # proj_dir="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\3_EDF\\4_EDF_qo\\"
-    # proj_name="EDF"
-    # vel_file0=proj_dir+proj_name+".vel1"
+    proj_dir="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\6_qo\\3_qo\\"
+    proj_name="wing"
+    vel_file0=proj_dir+proj_name+".vel1"
+
+    vel_file="results/wing_qo/corner4.vel1"
+    shutil.copy(vel_file0,vel_file)
 
     # vel_file="results/EDF_qo/6.vel1"
-    # shutil.copy(vel_file0,vel_file)
-
-    vel_file="results/EDF_qo/6.vel1"
 
     plane="xz"
 
     data=read_velcal(vel_file)
     contour_axes=contours_2d(data,plane)
 
-    plot_geom(contour_axes,["data/EDF_blockage.json","data/EDF_nacelle.json"])
+    #plot_geom(contour_axes,["data/EDF_blockage.json","data/EDF_nacelle.json"])
+    for ax in contour_axes:
+        qo(proj_dir+proj_name+".qo",ax=ax)
     
     plt.show()

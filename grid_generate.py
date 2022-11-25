@@ -122,7 +122,7 @@ def cuboid_empty(data:dict)->np.ndarray:
         coords=np.array(coords_)
 
     else:
-        raise Exception("Grid definition error: 1D not supported for empty cuboids.")
+        raise Exception("Grid definition error: 2D & 3D only supported for empty cuboids.")
 
     return coords
 
@@ -168,7 +168,7 @@ def cylinder(data:dict)->np.ndarray:
 
     return coords
 
-def plot_grid(coords,dV=None):
+def plot_grid(coords,dV=None,ax=None):
     if dV!=None:
         cmap=cm.jet
         minV=coords[:,3+dV].min()
@@ -179,7 +179,8 @@ def plot_grid(coords,dV=None):
             extend='neither'
         )
 
-    fig=plt.figure()
+    if ax==None:
+        fig=plt.figure()
 
     # check if x,y, or z are const
     const_check=np.all(coords==coords[0,:],axis=0)[:3]
@@ -189,7 +190,8 @@ def plot_grid(coords,dV=None):
         zero_index=np.where(const_check==True)[0][0]
         coords=np.delete(coords,zero_index,axis=1)
 
-        ax=plt.axes()
+        if ax==None:
+            ax=plt.axes()
         if dV!=None:
             for coord in coords:
                 ax.scatter(coord[0],coord[1],color=cmap(norm(coords[3+dV])),marker='.')
@@ -198,7 +200,8 @@ def plot_grid(coords,dV=None):
         ax.set_aspect('equal')
 
     else:
-        ax=plt.axes(projection='3d')
+        if ax==None:
+            ax=plt.axes(projection='3d')
 
         if dV!=None:
             for coord in coords:
@@ -219,7 +222,7 @@ def plot_grid(coords,dV=None):
         sm=plt.cm.ScalarMappable(cmap=cmap,norm=norm)
         plt.colorbar(sm,ax=ax,label="dV",pad=0.10)
 
-    plt.show()
+    return plt
 
 def export_grid(run,wake,coords,file_type):
     
@@ -265,18 +268,19 @@ def const_qo(coords,dV):
 
 if __name__=="__main__":
 
-    proj_name="EDF"
-    directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\3_EDF\\4_EDF_qo\\"
+    proj_name="wing"
+    directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\6_qo\\3_qo\\"
 
-    grid_def=["grids/EDF_bb.json","grids/EDF_efflux_sleeve.json","grids/EDF_qo.json"]
+    #grid_def=["grids/EDF_bb.json","grids/EDF_efflux_sleeve.json","grids/EDF_qo.json"]
+    grid_def=["grids/wing_qo_xz.json"]
 
     run=1
-    wake=1
+    wake=0
 
     plot=True
     export=True
 
-    file_type=".qo"
+    file_type=".scn"
 
     ####################################################################################
 
@@ -308,6 +312,8 @@ if __name__=="__main__":
             plot_grid(coords,dV=0)
         else:
             plot_grid(coords)
+        
+        plt.show()
     
     if export==True:
         export_grid(run,wake,coords,file_type)
