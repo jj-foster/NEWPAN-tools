@@ -4,9 +4,8 @@
 /env
 /mdot_method.png
 /.vscode
-/.gitignore
 /results
 /modules
 /step_grid.py
-/results_plotting
+/results_plotting.py
 /BLO_grid.py
