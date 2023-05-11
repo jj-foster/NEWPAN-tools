@@ -23,6 +23,6 @@
 - Requires VELCAL data from a grid, and the grid definition file.
 
 ### **STL Read:**
-- Read and plot NEWPAN exported .stl files.
+- Read and plot GEMS exported .stl files.
 - Just in case you wanted to make some really snazzy plots.
 
