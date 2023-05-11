@@ -1,11 +1,12 @@
 from velcal_vis_2D import read_velcal
-from grid_generate import cylinder, cuboid
+from grid_generate import cylinder, cuboid_filled
 
 import numpy as np
 import json
 import shutil
+from typing import Tuple
 
-def mass_flow_rate_disk(data_file,grid_def):
+def mass_flow_rate_disk(data_file: str, grid_def: str) -> Tuple[float]:
     
     vel_data=read_velcal(data_file)
     
@@ -49,8 +50,8 @@ def mass_flow_rate_disk(data_file,grid_def):
     V=np.zeros((r_count,angle_count))
     Cp=np.zeros((r_count,angle_count))
 
-    mdot=0
-    line_count=0
+    mdot: float = 0
+    line_count: int = 0
     for i in range(r_count):
         for j in range(angle_count):
 
@@ -67,11 +68,11 @@ def mass_flow_rate_disk(data_file,grid_def):
             
             # mdot calculation - assumes constant density
 
-            AU=(r_steps[i]**2-r_steps[i-1]**2)*((V[i,j]+V[i,j-1]+V[i-1,j]+V[i-1,j-1])/4)
+            AU: float =(r_steps[i]**2-r_steps[i-1]**2)*((V[i,j]+V[i,j-1]+V[i-1,j]+V[i-1,j-1])/4)
             mdot+=AU*np.pi*angle_steps[1]/(2*np.pi)
     
-    u_avg=round(np.mean(V[:,0]), 4-int(np.floor(np.log10(abs(np.mean(V[:,0])))))-1)
-    mdot=round(mdot, 4-int(np.floor(np.log10(abs(mdot))))-1)
+    u_avg: float = round(np.mean(V[:,0]), 4-int(np.floor(np.log10(abs(np.mean(V[:,0])))))-1)
+    mdot: float = round(mdot, 4-int(np.floor(np.log10(abs(mdot))))-1)
 
     return mdot,u_avg
     
@@ -84,8 +85,15 @@ if __name__=="__main__":
     # relocate="results/EDF_actuator/EDF_inlet.vel1"
     # shutil.copy(vel_file,relocate)
 
-    vel_file="results/EDF_actuator/EDF_inlet.vel1"
-    grid_def="grids/EDF_inlet.json"
+    vel_files=[
+        "results/EDF_actuator/mass_flow/no_wake/CT0_inlet.vel1",
+        "results/EDF_actuator/mass_flow/no_wake/CT0_outlet.vel1"
+    ]
+    grid_defs=[
+        "grids/EDF_inlet.json",
+        "grids/EDF_outlet.json"
+    ]
 
-    mdot,u_avg=mass_flow_rate_disk(vel_file,grid_def)
-    print(f"u_avg: {u_avg}\nmdot: {mdot}")
+    for i,_ in enumerate(vel_files):
+        mdot,u_avg=mass_flow_rate_disk(vel_files[i],grid_defs[i])
+        print(f"u_avg: {u_avg}\nmdot: {mdot}")

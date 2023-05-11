@@ -8,7 +8,7 @@ import os
 import numpy as np
 from shapely import ops
 
-def read(data_files:list):
+def read_exp2d(data_files:list):
 
     curve_data=[]
     curve_columns=[]
@@ -59,7 +59,7 @@ def read(data_files:list):
 
     return data, curve_names
 
-def plot(data:list,curve_names:list,variable:str,units:str):
+def plot_exp2d(data:list,curve_names:list,variable:str,units:str):
 
     fig,ax1=plt.subplots()
     ax2=ax1.twinx()
@@ -68,34 +68,25 @@ def plot(data:list,curve_names:list,variable:str,units:str):
         xs=curve['X'].tolist()
         y1s=curve[variable].tolist()
 
-        """
-        if curve_names[i][:2]=="cl":
-            color='r'
-        else:
-            color='b'
-
-        if curve_names[i][-1]=="0":
-            marker='o'
-        else:
-            marker='D'
-
-        ax1.plot(xs,y1s,marker=marker,color=color,label=curve_names[i])
-        """
-
-        ax1.plot(xs,y1s,marker='o',label=curve_names[i])
+        ax1.plot(xs,y1s,color='k',linestyle=LINESTYLES[i],label=curve_names[i])
 
     y2s=curve['Y'].tolist()
-    ax2.plot(xs,y2s,color='k',label='Geometry')
+    ax2.plot(xs,y2s,color='k',label='Nacelle')
 
     ax1.set_xlabel(f"x ({units})")
     ax2.set_ylabel(f"y ({units})")
     ax1.set_ylabel(variable)
 
     ax2.set_aspect('equal')
-    ax1.legend()
+    ax2.set_box_aspect(1)
 
     if variable=="Cp":
         ax1.invert_yaxis()
+
+        
+    lines1,labels1=ax1.get_legend_handles_labels()
+    lines2,labels2=ax2.get_legend_handles_labels()
+    ax2.legend(lines1+lines2,labels1+labels2,frameon=False,loc="upper left")
 
     return plt
 
@@ -163,10 +154,10 @@ if __name__=="__main__":
     variable='Cp'
     units='m'
     
-    data,curve_names=read(data_files)
+    data,curve_names=read_exp2d(data_files)
 
     area=intersecting_area(data[0]['X'].to_list(),data[0]['Cp'].to_list(),plot=True)
     print(f"Area: {area}")
 
-    fig=plot(data,curve_names,variable,units)
+    fig=plot_exp2d(data,curve_names,variable,units)
     plt.show()

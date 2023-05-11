@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
+from matplotlib import colors
+from matplotlib import ticker
 import numpy as np
 import pandas as pd
 import shutil
@@ -7,67 +8,84 @@ import json
 
 from qo_vis import qo
 
-def read_velcal(file):
+plt.rcParams["font.family"]="Arial"
+plt.rcParams["mathtext.fontset"]="cm"
+plt.rcParams["font.size"]=11
 
-    data=pd.read_csv(file,skiprows=2,skip_blank_lines=True,delim_whitespace=True,header=None)
+def read_velcal(file:str) -> pd.DataFrame:
+
+    data=pd.read_csv(
+        file,skiprows=2,skip_blank_lines=True,delim_whitespace=True,header=None
+    )
     data.columns=["x","y","z","u","v","w","Cp"]
-    data=data.apply(lambda x: pd.to_numeric(x, errors='coerce'))#.dropna()
+    #data=data.apply(lambda x: pd.to_numeric(x, errors='coerce'))#.dropna()
 
-    data.fillna(10000,inplace=True)
+    #data.fillna(10000,inplace=True)
     
-    data=data.reset_index()
+    #data=data.reset_index()
 
     return data
 
-def plot(xs,ys,z,title,contours,plane,vmin=None,vmax=None):
-    # limit
+def pcolourmesh(ax,x,y,z,cmap,centered:bool=True, at:float=1):
+    vmin = min(z)
+    vmax = max(z)
+
+    df = pd.DataFrame(dict(x=x,y=y,z=z))
+    xcol,ycol,zcol = "x","y","z"
+    df = df.sort_values(by = [xcol, ycol])
+    xvals = df[xcol].unique()
+    yvals = df[ycol].unique()
+    zvals = df[zcol].values.reshape(len(xvals), len(yvals)).T
+
+    # plot
+
+    if centered:
+        cs=ax.pcolormesh(
+            xvals,yvals,zvals,cmap=cmap, norm=colors.CenteredNorm(vcenter=at)
+        )
+    else:
+        levels_ = ticker.MaxNLocator(nbins=50).tick_values(z.min(),z.max())
+        cmap = plt.get_cmap(cmap)
+        # bounds = np.linspace(vmin,vmax,20)
+        norm = colors.BoundaryNorm(levels_, ncolors = cmap.N, clip = True)
+
+        cs=ax.pcolormesh(
+            xvals,yvals,zvals,cmap=cmap, norm=norm
+        )
+
+    return cs
+
+def contour(ax,x,y,z,cmap:str,levels:int,centered:bool=True, at:float=1):
+
+    if centered:
+        cs = ax.tricontourf(
+            x,y,z,levels,cmap=cmap, norm=colors.CenteredNorm(vcenter=at)
+        )
+    else:
+        cs = ax.tricontourf(x,y,z,levels,cmap=cmap)
+
+    return cs
+
+def limit(x:np.ndarray,y:np.ndarray,z:np.ndarray,vmin=None, vmax=None):
     if vmin==None:
         vmin=min(z)
     if vmax==None:
         vmax=max(z)
 
     z_=[]
-    for i,_ in enumerate(xs):
-        if z[i]<vmin:
-            z_.append(vmin)
-        elif z[i]>vmax:
-            z_.append(vmax)
+    for i,_ in enumerate(x):
+        if z[i] < vmin:
+            z_.append(vmin + 0.01)
+        elif z[i] > vmax:
+            z_.append(vmax - 0.01)
         else:
             z_.append(z[i])
-    
-    # plot
-    fig,ax=plt.subplots()
-    
-    cs=ax.tricontourf(xs,ys,z_,contours,cmap='jet')
-    cbar=fig.colorbar(cs,label=title)
 
-    ax.set_aspect('equal')
-    ax.set_title(title)
-    ax.set_xlabel(plane[0])
-    ax.set_ylabel(plane[1])
+    z = np.array(z_)
 
-    return ax
+    return x,y,z
 
-def contours_2d(data,plane):
-    
-    if plane.upper()=="XZ":
-        xs,ys=data["x"].to_numpy(),data["z"].to_numpy()
-    elif plane.upper()=="XY":
-        xs,ys=data["x"],data["y"]
-    elif plane.upper()=="YZ":
-        xs,ys=data["y"],data["z"]
-    else:
-        raise ValueError("Invalid plane.")
-
-    axes=[]
-    # axes.append(plot(xs,ys,data["u"],"u",50,plane,vmin=-2,vmax=2))
-    # axes.append(plot(xs,ys,data["v"],"v",50,plane,vmin=-5,vmax=5))
-    axes.append(plot(xs,ys,data["w"],"w",50,plane,vmin=-2,vmax=2))
-    # axes.append(plot(xs,ys,data["Cp"],"Cp",50,plane)#,vmin=-10,vmax=1))
-
-    return axes
-
-def plot_geom(axes:list[plt.axes], geom_files:list):
+def plot_geom(axes:list[plt.axes], geom_files:list, fill:bool = True):
     """
     Only works with symmetry in xy plane for now. Not general!
     """
@@ -92,28 +110,58 @@ def plot_geom(axes:list[plt.axes], geom_files:list):
                 coords_sym[i,2]=-coords[i,2]
 
         for ax in axes:
-            ax.fill(coords[:,0],coords[:,2],color='white')
-            if sym_plane!=[]:
-                ax.fill(coords_sym[:,0],coords_sym[:,2],color='white')
+            if fill == True:
+                ax.fill(coords[:,0],coords[:,2],color='white')
+                if sym_plane!=[]:
+                    ax.fill(coords_sym[:,0],coords_sym[:,2],color='white')
+
+            else:
+                lines, = ax.plot(coords[:,0],coords[:,2],color='k',label="")
+                if sym_plane!=[]:
+                    ax.plot(coords_sym[:,0],coords_sym[:,2],color='k')
+
+                return lines
 
 if __name__=="__main__":  
 
-    proj_dir="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\6_qo\\3_qo\\"
-    proj_name="wing"
-    vel_file0=proj_dir+proj_name+".vel1"
 
-    vel_file="results/wing_qo/corner4.vel1"
-    shutil.copy(vel_file0,vel_file)
-
-    # vel_file="results/EDF_qo/6.vel1"
+    vel_file = "results/pereira_J/6_blo_actuator_blunt/CT1.vel1"
+    
+    directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\8_Pereira_J_2008\\6_blo_actuator_blunt\\"
+    proj_name = "SHROUD_ACTUATOR"
+    shutil.copy(directory + proj_name + ".vel1",vel_file)
 
     plane="xz"
+    variable="u"
+    levels = 50
+    bounds = [-5,5]
+
+    ############################################################################
 
     data=read_velcal(vel_file)
-    contour_axes=contours_2d(data,plane)
+    x,y,z = limit(
+        x=data[plane[0]],
+        y=data[plane[1]],
+        z=data[variable],
+        vmin=bounds[0],
+        vmax=bounds[1]
+    )
 
-    #plot_geom(contour_axes,["data/EDF_blockage.json","data/EDF_nacelle.json"])
-    for ax in contour_axes:
-        qo(proj_dir+proj_name+".qo",ax=ax)
-    
+    fig,ax=plt.subplots()
+    # cs = contour(ax,x,y,z,cmap="coolwarm",levels=levels,centered=False)
+    cs = pcolourmesh(ax,x,y,z,"coolwarm",centered=True,at=0)
+
+    plot_geom([ax],["data/SHROUD_BLO_ACTUATOR.json"])
+
+    # qo(proj_dir+proj_name+".qo",ax=ax)
+
+    ax.set_xlabel(f"{plane[0]} (m)")
+    ax.set_ylabel(f"{plane[1]} (m)")
+    ax.set_aspect("equal")
+    ax.set_box_aspect(1)
+
+    cbar = fig.colorbar(cs,ax=ax,shrink=1)
+    cbar.set_label(f"{variable}")
+
+    # plt.legend(facecolor="white",framealpha=1,fancybox=False,edgecolor="black")
     plt.show()

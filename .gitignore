@@ -6,3 +6,7 @@
 /.vscode
 /.gitignore
 /results
+/modules
+/step_grid.py
+/results_plotting
+/BLO_grid.py

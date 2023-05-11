@@ -24,8 +24,8 @@ def cuboid_filled(data:dict)->np.ndarray:
     else:
         zs=[z0]
 
-    if 0 not in [x_count,y_count,z_count] and 1 not in [x_count,y_count,z_count]:
-        raise ValueError("2D planes only")
+    # if 0 not in [x_count,y_count,z_count] and 1 not in [x_count,y_count,z_count]:
+    #     raise ValueError("2D planes only")
 
     coords=[]
     for i in xs:
@@ -202,6 +202,7 @@ def plot_grid(coords,dV=None,ax=None):
     else:
         if ax==None:
             ax=plt.axes(projection='3d')
+        ax.set_proj_type("ortho")
 
         if dV!=None:
             for coord in coords:
@@ -222,12 +223,14 @@ def plot_grid(coords,dV=None,ax=None):
         sm=plt.cm.ScalarMappable(cmap=cmap,norm=norm)
         plt.colorbar(sm,ax=ax,label="dV",pad=0.10)
 
+    
     return plt
 
 def export_grid(run,wake,coords,file_type):
     
     if file_type==".scn":
         lines=[f"{run} {wake}\n"]
+
     elif file_type==".qo" or file_type==".qom" or file_type==".qpt":
         coords_=[]
         for coord in coords:
@@ -236,6 +239,9 @@ def export_grid(run,wake,coords,file_type):
         coords=np.array(coords_)
 
         lines=[f"{int(len(coords))}\n"]
+
+    elif file_type==".spt":
+        lines=[f"{run} {wake}\n[start] [end]\n"]
     else:
         raise Exception(f"{file_type} is not a valid file type.")
 
@@ -266,52 +272,69 @@ def const_qo(coords,dV):
 
     return coords
 
+def grid_type_coords(grid_file:str) -> np.ndarray:
+    """Generates grid coordinates given a grid definition file.
+    Automatically determines grid type.
+
+    Args:
+        grid_file (str): .json grid definition file
+
+    Returns:
+        np.ndarray: Coordinates [x,y,z]
+    """
+    with open(grid_file,'r') as f:
+        data=json.load(f)
+
+    if data["type"]=="cylinder":
+        coords=cylinder(data)
+    elif data["type"]=="cuboid":
+        if data["filled"]==True:
+            coords=cuboid_filled(data)
+        else:
+            coords=cuboid_empty(data)
+    else:
+        raise ValueError("Invalid grid type.")
+
+    if "qo" in data:
+        coords=const_qo(coords,data["qo"])
+
+    return coords
+        
+
 if __name__=="__main__":
 
-    proj_name="wing"
-    directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\6_qo\\3_qo\\"
+    proj_name="0V-0A-CT"
+    directory="D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/8_Pereira_J_2008/PROP/LR13-D10-d0.6-L72/0V-0A-0.0211CT/"
 
-    #grid_def=["grids/EDF_bb.json","grids/EDF_efflux_sleeve.json","grids/EDF_qo.json"]
-    grid_def=["grids/wing_qo_xz.json"]
+    # grid_def=["grids/Pereira, 2008/0V_QO.json"]
+    grid_def=["grids/Pereira, 2008/axial wake/xR=2.08.json"]
+    # grid_def = ["grids/Pereira, 2008/SHROUD_xz.json"]
 
     run=1
     wake=0
 
-    plot=True
+    plot=False
     export=True
 
+    # scn (velcal), spt (offbody), qo, qom
     file_type=".scn"
 
     ####################################################################################
 
     coords=[]
     for grid in grid_def:
-
-        with open(grid,'r') as f:
-            data=json.load(f)
-
-        if data["type"]=="cylinder":
-            coords_=cylinder(data)
-        elif data["type"]=="cuboid":
-            if data["filled"]==True:
-                coords_=cuboid_filled(data)
-            else:
-                coords_=cuboid_empty(data)
-        else:
-            raise ValueError("Invalid grid type.")
-
-        if file_type==".qo" or file_type==".qom":
-            coords_=const_qo(coords_,data["qo"])
-        
+        coords_ = grid_type_coords(grid)
         coords.append(coords_)
 
     coords=np.concatenate([coords[i] for i in range(len(coords))])
         
     if plot==True:
         if file_type==".qo" or file_type==".qom":
-            plot_grid(coords,dV=0)
+            plot_grid(coords,dV=None)
         else:
             plot_grid(coords)
+
+        plt.tight_layout()
         
         plt.show()
     
