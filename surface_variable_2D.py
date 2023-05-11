@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-from shapely import ops
 
 def read_exp2d(data_files:list):
 
@@ -90,74 +89,14 @@ def plot_exp2d(data:list,curve_names:list,variable:str,units:str):
 
     return plt
 
-def intersecting_area(xs:list,ys:list,plot=False):
-
-    # snip ends of curves to match in x
-    if xs[0]!=xs[-1]:
-        x_min=min([xs[0],xs[-1]])
-        xs[0]=x_min
-        xs[1]=x_min
-
-    # split curve into 2 surfaces
-    split_i=xs.index(min(xs))
-    xy0=np.array([xs[:split_i+1], ys[:split_i+1]]).T
-    xy0=np.flip(xy0,axis=0)
-    xy1=np.array([xs[split_i:], ys[split_i:]]).T
-    
-    polygon_pts=[]
-    for xy in xy0:
-        polygon_pts.append([xy[0],xy[1]])
-    for xy in xy1[::-1]:
-        polygon_pts.append([xy[0],xy[1]])
-        
-    polygon_pts.append([xy0[0][0],xy0[0][1]])   # append start of curve at end (closes polygon)
-    
-    # poly0=[]
-    # poly1=[]
-    # for xy in xy0:
-    #     poly0.append([xy[0],xy[1]])
-    # for xy in xy1:
-    #     poly1.append([xy[0],xy[1]])
-    
-    line_non_simple=ops.LineString(polygon_pts)
-    mls=ops.unary_union(line_non_simple)
-
-    areas=[]
-    for polygon in ops.polygonize(mls):
-        areas.append(polygon.area)
-        
-    area_sum=areas[0]-areas[1]
-
-    if plot==True:
-        fig,ax=plt.subplots()
-        ax.invert_yaxis()
-
-        for polygon in ops.polygonize(mls):
-            ax.plot(*polygon.exterior.xy)
-            centroid=polygon.centroid.xy
-            ax.text(centroid[0][0],centroid[1][0],f"{round(polygon.area,4)}")
-
-
-    return area_sum
-
 if __name__=="__main__":
-    
-    # data_files=[
-    #     "data/EDF_wing/CT0.0_CQ0.0_w1.exp2d",
-    #     "data/EDF_wing/CT0.1_CQ0.0_w1.exp2d",
-    #     "data/EDF_wing/CT0.2_CQ0.0_w1.exp2d",
-    #     "data/EDF_wing/CT0.5_CQ0.0_w1.exp2d",
-    #     "data/EDF_wing/CT3.0_CQ0.0_w1.exp2d",
-    # ]
+   
     data_files=["data/nacelle_cp.exp2d"]
 
     variable='Cp'
     units='m'
     
     data,curve_names=read_exp2d(data_files)
-
-    area=intersecting_area(data[0]['X'].to_list(),data[0]['Cp'].to_list(),plot=True)
-    print(f"Area: {area}")
 
     fig=plot_exp2d(data,curve_names,variable,units)
     plt.show()

@@ -1,4 +1,4 @@
-## NEWPAN stuff
+## NEWPAN Tools
 
 (NEWPAN the panel method)
 

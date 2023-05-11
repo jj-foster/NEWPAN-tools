@@ -2,6 +2,7 @@ import numpy as np
 import json
 import matplotlib.pyplot as plt
 from matplotlib import cm, colors
+from typing import List
 
 def cuboid_filled(data:dict)->np.ndarray:
     corner = np.array(data["corner"])
@@ -248,7 +249,7 @@ def export_grid(run,wake,coords,file_type):
     for coord in coords:
         lines.append(f"{' '.join([str(x) for x in coord.tolist()])}\n")
     
-    with open(f"{directory}{proj_name}{file_type}",'w') as f:
+    with open(f"{directory}{newpan_proj_name}{file_type}",'w') as f:
         f.writelines(lines)
 
     return None
@@ -300,27 +301,9 @@ def grid_type_coords(grid_file:str) -> np.ndarray:
 
     return coords
         
-
-if __name__=="__main__":
-
-    proj_name="0V-0A-CT"
-    directory="D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/8_Pereira_J_2008/PROP/LR13-D10-d0.6-L72/0V-0A-0.0211CT/"
-
-    # grid_def=["grids/Pereira, 2008/0V_QO.json"]
-    grid_def=["grids/Pereira, 2008/axial wake/xR=2.08.json"]
-    # grid_def = ["grids/Pereira, 2008/SHROUD_xz.json"]
-
-    run=1
-    wake=0
-
-    plot=False
-    export=True
-
-    # scn (velcal), spt (offbody), qo, qom
-    file_type=".scn"
-
-    ####################################################################################
-
+def main(proj_name:str, directory:str, grid_def:List[str],run:int,wake:int,
+         plot:bool,export:bool,ftype:str):
+    
     coords=[]
     for grid in grid_def:
         coords_ = grid_type_coords(grid)
@@ -340,3 +323,23 @@ if __name__=="__main__":
     
     if export==True:
         export_grid(run,wake,coords,file_type)
+
+    return None
+
+if __name__=="__main__":
+
+    newpan_proj_name="0V-0A-CT"
+    directory="D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/8_Pereira_J_2008/PROP/LR13-D10-d0.6-L72/0V-0A-0.0211CT/"
+
+    grid_def=["grids/Pereira, 2008/axial wake/xR=2.08.json"]
+
+    run=1
+    wake=0
+
+    plot=False
+    export=True
+
+    # scn (velcal), spt (offbody), qo, qom
+    file_type=".scn"
+
+    main(newpan_proj_name,directory,grid_def,run,wake,plot,export,file_type)

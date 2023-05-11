@@ -6,8 +6,6 @@ import pandas as pd
 import shutil
 import json
 
-from qo_vis import qo
-
 plt.rcParams["font.family"]="Arial"
 plt.rcParams["mathtext.fontset"]="cm"
 plt.rcParams["font.size"]=11
@@ -127,9 +125,9 @@ if __name__=="__main__":
 
     vel_file = "results/pereira_J/6_blo_actuator_blunt/CT1.vel1"
     
-    directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\8_Pereira_J_2008\\6_blo_actuator_blunt\\"
-    proj_name = "SHROUD_ACTUATOR"
-    shutil.copy(directory + proj_name + ".vel1",vel_file)
+    # directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\8_Pereira_J_2008\\6_blo_actuator_blunt\\"
+    # proj_name = "SHROUD_ACTUATOR"
+    # shutil.copy(directory + proj_name + ".vel1",vel_file)
 
     plane="xz"
     variable="u"
@@ -152,8 +150,6 @@ if __name__=="__main__":
     cs = pcolourmesh(ax,x,y,z,"coolwarm",centered=True,at=0)
 
     plot_geom([ax],["data/SHROUD_BLO_ACTUATOR.json"])
-
-    # qo(proj_dir+proj_name+".qo",ax=ax)
 
     ax.set_xlabel(f"{plane[0]} (m)")
     ax.set_ylabel(f"{plane[1]} (m)")
