@@ -58,8 +58,16 @@ def mass_flow_rate_disk(data_file: str, grid_def: str) -> Tuple[float]:
             u[i,j]=vel_data["u"][line_count]
             v[i,j]=vel_data["v"][line_count]
             w[i,j]=vel_data["w"][line_count]
+
+            if np.isnan(u[i,j]):
+                u[i,j]=0
+            if np.isnan(v[i,j]):
+                v[i,j]=0
+            if np.isnan(w[i,j]):
+                w[i,j]=0
+
             Cp[i,j]=vel_data["Cp"][line_count]
-            V[i,j]=np.sqrt(u[i,j]**2+v[i,j]**2+w[i,j]**2)
+            # V[i,j]=np.sqrt(u[i,j]**2+v[i,j]**2+w[i,j]**2)
 
             line_count+=1
 
@@ -68,32 +76,31 @@ def mass_flow_rate_disk(data_file: str, grid_def: str) -> Tuple[float]:
             
             # mdot calculation - assumes constant density
 
-            AU: float =(r_steps[i]**2-r_steps[i-1]**2)*((V[i,j]+V[i,j-1]+V[i-1,j]+V[i-1,j-1])/4)
-            mdot+=AU*np.pi*angle_steps[1]/(2*np.pi)
+            AU: float =(r_steps[i]**2-r_steps[i-1]**2)*((u[i,j]+u[i,j-1]+u[i-1,j]+u[i-1,j-1])/4)
+            mdot_=AU*np.pi*angle_steps[1]/(2*np.pi)
+
+            mdot+=mdot_
     
-    u_avg: float = round(np.mean(V[:,0]), 4-int(np.floor(np.log10(abs(np.mean(V[:,0])))))-1)
+    u_avg: float = round(np.mean(u[:,0]), 4-int(np.floor(np.log10(abs(np.mean(u[:,0])))))-1)
+    # u_avg=0
     mdot: float = round(mdot, 4-int(np.floor(np.log10(abs(mdot))))-1)
 
     return mdot,u_avg
     
 if __name__=="__main__":
-    
-    # proj_dir="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\3_EDF\\3_EDFActuatorDisk_wake\\"
-    # proj_name="EDF"
-    # vel_file=proj_dir+proj_name+".vel1"
 
-    # relocate="results/EDF_actuator/EDF_inlet.vel1"
-    # shutil.copy(vel_file,relocate)
-
+    dir_="D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/8_Pereira_J_2008/PROP/LR13-D10-d0.1-D31/cases/"
     vel_files=[
-        "results/EDF_actuator/mass_flow/no_wake/CT0_inlet.vel1",
-        "results/EDF_actuator/mass_flow/no_wake/CT0_outlet.vel1"
+        "D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/8_Pereira_J_2008/PROP/LR13-D10-d0.6-L72/0V-0A-0.0211CT/0V-0A-CT.vel1",
+        # dir_+"0V-0A/0V-0A.vel1",
+        # dir_+"3V-0A/3V-0A.vel1",
+        # dir_+"3V-30A/3V-30A.vel1",
+        # dir_+"3V-60A/3V-60A.vel1",
+        # dir_+"3V-90A/3V-90A.vel1",
     ]
-    grid_defs=[
-        "grids/EDF_inlet.json",
-        "grids/EDF_outlet.json"
-    ]
+    # grid_def="grids/Pereira, 2008/SHROUD_outlet.json"
+    grid_def = "grids/Pereira, 2008/SHROUD_outlet_L72.json"
 
     for i,_ in enumerate(vel_files):
-        mdot,u_avg=mass_flow_rate_disk(vel_files[i],grid_defs[i])
+        mdot,u_avg=mass_flow_rate_disk(vel_files[i],grid_def)
         print(f"u_avg: {u_avg}\nmdot: {mdot}")
