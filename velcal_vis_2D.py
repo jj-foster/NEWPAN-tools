@@ -16,6 +16,8 @@ def read_velcal(file:str) -> pd.DataFrame:
         file,skiprows=2,skip_blank_lines=True,delim_whitespace=True,header=None
     )
     data.columns=["x","y","z","u","v","w","Cp"]
+    data["V"] = np.sqrt(data["u"]**2 + data["v"]**2 + data["w"]**2)
+
     #data=data.apply(lambda x: pd.to_numeric(x, errors='coerce'))#.dropna()
 
     #data.fillna(10000,inplace=True)
@@ -122,17 +124,17 @@ def plot_geom(axes:list[plt.axes], geom_files:list, fill:bool = True):
 
 if __name__=="__main__":  
 
-
-    vel_file = "results/pereira_J/6_blo_actuator_blunt/CT1.vel1"
+    vel_file = "results/pereira_J/6_blo_actuator_blunt/test.vel1"
     
-    # directory="D:\\Documents\\University\\NEWPAN VM\\VMDrive2_120122\\VMDrive2\\DataVM2\\Projects\\8_Pereira_J_2008\\6_blo_actuator_blunt\\"
-    # proj_name = "SHROUD_ACTUATOR"
-    # shutil.copy(directory + proj_name + ".vel1",vel_file)
+    dir_="D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/8_Pereira_J_2008/PROP/LR13-D10-d0.1-D31/cases/"
+    directory = dir_ + "0V-0A/"
+    proj_name = "xz_contours"
+    shutil.copy(directory + proj_name + ".vel1",vel_file)
 
     plane="xz"
-    variable="u"
+    variable="V"
     levels = 50
-    bounds = [-5,5]
+    bounds = [0,10]
 
     ############################################################################
 
@@ -140,21 +142,21 @@ if __name__=="__main__":
     x,y,z = limit(
         x=data[plane[0]],
         y=data[plane[1]],
-        z=data[variable],
+        z=data[variable] * 3.048,
         vmin=bounds[0],
         vmax=bounds[1]
     )
 
     fig,ax=plt.subplots()
-    # cs = contour(ax,x,y,z,cmap="coolwarm",levels=levels,centered=False)
-    cs = pcolourmesh(ax,x,y,z,"coolwarm",centered=True,at=0)
+    # cs = contour(ax,x,y,z,cmap="coolwarm",levels=levels,centered=True,at=0)
+    cs = pcolourmesh(ax,x,y,z,"coolwarm",centered=False,at=0)
 
     plot_geom([ax],["data/SHROUD_BLO_ACTUATOR.json"])
 
     ax.set_xlabel(f"{plane[0]} (m)")
     ax.set_ylabel(f"{plane[1]} (m)")
     ax.set_aspect("equal")
-    ax.set_box_aspect(1)
+    # ax.set_box_aspect(1)
 
     cbar = fig.colorbar(cs,ax=ax,shrink=1)
     cbar.set_label(f"{variable}")

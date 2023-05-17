@@ -328,15 +328,16 @@ def main(proj_name:str, directory:str, grid_def:List[str],run:int,wake:int,
 
 if __name__=="__main__":
 
-    newpan_proj_name="0V-0A-CT"
-    directory="D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/8_Pereira_J_2008/PROP/LR13-D10-d0.6-L72/0V-0A-0.0211CT/"
+    newpan_proj_name="QO_WING"
+    directory="D:/Documents/University/NEWPAN VM/VMDrive2_120122/VMDrive2/DataVM2/Projects/6_qo/6_qo_wing/"
 
-    grid_def=["grids/Pereira, 2008/axial wake/xR=2.08.json"]
+    grid_def=["grids/tests/QO_WING_xz.json"]
+    # grid_def = ["grids/Pereira, 2008/SHROUD_xz.json"]
 
     run=1
-    wake=0
+    wake=2
 
-    plot=False
+    plot=True
     export=True
 
     # scn (velcal), spt (offbody), qo, qom
